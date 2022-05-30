@@ -2,6 +2,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtGui import QImage
 import cv2, imutils
+import numpy as np
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -21,14 +23,27 @@ class Ui_MainWindow(object):
         self.horizontalLayout_3.addWidget(self.label)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+
         self.verticalSlider = QtWidgets.QSlider(self.centralwidget)
         self.verticalSlider.setOrientation(QtCore.Qt.Vertical)
         self.verticalSlider.setObjectName("verticalSlider")
         self.horizontalLayout.addWidget(self.verticalSlider)
+
         self.verticalSlider_2 = QtWidgets.QSlider(self.centralwidget)
         self.verticalSlider_2.setOrientation(QtCore.Qt.Vertical)
         self.verticalSlider_2.setObjectName("verticalSlider_2")
         self.horizontalLayout.addWidget(self.verticalSlider_2)
+
+        self.verticalSlider_3 = QtWidgets.QSlider(self.centralwidget)
+        self.verticalSlider_3.setOrientation(QtCore.Qt.Vertical)
+        self.verticalSlider_3.setObjectName("verticalSlider_3")
+        self.horizontalLayout.addWidget(self.verticalSlider_3)
+
+        self.verticalSlider_4 = QtWidgets.QSlider(self.centralwidget)
+        self.verticalSlider_4.setOrientation(QtCore.Qt.Vertical)
+        self.verticalSlider_4.setObjectName("verticalSlider_4")
+        self.horizontalLayout.addWidget(self.verticalSlider_4)
+
         self.horizontalLayout_3.addLayout(self.horizontalLayout)
         self.gridLayout.addLayout(self.horizontalLayout_3, 0, 0, 1, 2)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
@@ -51,6 +66,9 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.verticalSlider.valueChanged['int'].connect(self.brightness_value)
         self.verticalSlider_2.valueChanged['int'].connect(self.blur_value)
+        self.verticalSlider_3.valueChanged['int'].connect(self.resize_value)
+        self.verticalSlider_4.valueChanged['int'].connect(self.gamma_value)
+
         self.pushButton_2.clicked.connect(self.loadImage)
         self.pushButton.clicked.connect(self.savePhoto)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -60,6 +78,9 @@ class Ui_MainWindow(object):
         self.tmp = None  # Will hold the temporary image for display
         self.brightness_value_now = 0  # Updated brightness value
         self.blur_value_now = 0  # Updated blur value
+        self.resize_value_now = 0
+        self.gamma_value_now = 0
+
 
     def loadImage(self):
         """ This function will load the user selected image
@@ -95,6 +116,17 @@ class Ui_MainWindow(object):
         print('Blur: ', value)
         self.update()
 
+    def resize_value(self, value):
+        self.resize_value_now = value
+        print('Resize: ', value)
+        self.update()
+        
+    def gamma_value(self, value):
+        self.gamma_value_now = value
+        print('Gamma: ', value)
+        self.update()                
+
+
     def changeBrightness(self, img, value):
         """ This function will take an image (img) and the brightness
             value. It will perform the brightness change using OpenCv
@@ -118,12 +150,25 @@ class Ui_MainWindow(object):
         img = cv2.blur(img, kernel_size)
         return img
 
+    def changeResize(self, img, value):
+        img = cv2.resize(img, (0, 0), fx = 1 - ((value-1) * 0.01), fy = 1 - ((value-1) * 0.01))
+        return img
+
+    def changeGamma(self, img, value):
+        out = img.astype(np.float)
+        out = ((out/255) ** (1 / ((value+1)*0.1))) * 255
+        img = out.astype(np.uint8)
+        return img        
+
+
     def update(self):
         """ This function will update the photo according to the
             current values of blur and brightness and set it to photo label.
         """
         img = self.changeBrightness(self.image, self.brightness_value_now)
         img = self.changeBlur(img, self.blur_value_now)
+        img = self.changeResize(img, self.resize_value_now)
+        img = self.changeGamma(img, self.gamma_value_now)
         self.setPhoto(img)
 
     def savePhoto(self):
