@@ -55,10 +55,21 @@ for file in file_list:
                 changedcolor_image = ImageEnhance.Color(image).enhance(factor=random.uniform(0.3, 1.5))
                 changedcolor_image.save(os.path.join(origin_path, name + '_c.png'))
 
-os.makedirs("./preprocessing", exist_ok=True)
+os.makedirs("./mango", exist_ok=True)
+os.makedirs("./lychee", exist_ok=True)
+os.makedirs("./durian", exist_ok=True)
+os.makedirs("./dragon_fruit", exist_ok=True)
 
 for idx, i in enumerate(os.listdir(origin_path)):
     open_img = cv2.imread(origin_path +f'/{i}')
     new_img = padding(open_img)
     category = i.split('.')[0].split('_')[0]
-    cv2.imwrite(f"./preprocessing/{category}_{idx}.png", new_img)
+
+    if category == 'mango':
+        cv2.imwrite(f"./mango/{category}_{idx}.png", new_img)
+    elif category == 'dragon':
+        cv2.imwrite(f"./dragon_fruit/{category}_{idx}.png", new_img)
+    elif category == 'durian':
+        cv2.imwrite(f"./durian/{category}_{idx}.png", new_img)
+    elif category == 'lychee':
+        cv2.imwrite(f"./lychee/{category}_{idx}.png", new_img)
